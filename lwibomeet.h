@@ -18,11 +18,17 @@ public:
 
     QLabel* getLabMeetRoomName();
     QLabel* getLabMeetRoomAddr();
+
+    void setUserID(int uID);
+    void setMeetRoomID(int mrID);
+
 private slots:
     void on_btnBook_clicked();
 
 private:
     Ui::lwiBoMeet *ui;
+    int userID;
+    int meetRoomID;
 };
 
 #endif // LWIBOMEET_H

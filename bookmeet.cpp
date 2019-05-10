@@ -3,22 +3,19 @@
 #include <QDateTime>
 #include <QDebug>
 #include <cmath>    //使用round()函数
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
 #include <QMessageBox>
 
-BookMeet::BookMeet(QWidget *parent) :
+BookMeet::BookMeet(int uID, int mrID, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::BookMeet)
+    ui(new Ui::BookMeet),
+    userID(uID), meetRoomID(mrID)
 {
     ui->setupUi(this);
 
-    //将提示信息的文本颜色设置为红色
-    QPalette pa;
-    pa.setColor(QPalette::WindowText,Qt::red);
-    ui->labNote->setPalette(pa);
-
-    //设置默认的会议开始时间和会议结束时间都为当前时间
-    ui->dteStart->setDateTime(QDateTime::currentDateTime());
-    ui->dteEnd->setDateTime(QDateTime::currentDateTime());
+    setDisplay();
 
     //关联信号和槽，使得每当用户改变会议开始时间或会议结束时间，客户端自动得出会议时长
     connect(ui->dteStart, SIGNAL(dateTimeChanged(const QDateTime)), this, SLOT(setMeetDura()));
@@ -46,5 +43,46 @@ void BookMeet::setMeetDura()
         ui->labMeetDura->setText(QString::number(meetDura, 'f', 2));
     }
 
-//    qDebug() << "Meeting duration is " << temp;
+}
+
+void BookMeet::setDisplay()
+{
+    //将提示信息的文本颜色设置为红色
+    QPalette pa;
+    pa.setColor(QPalette::WindowText,Qt::red);
+    ui->labNote->setPalette(pa);
+
+    //设置默认的会议开始时间和会议结束时间都为当前时间
+    ui->dteStart->setDateTime(QDateTime::currentDateTime());
+    ui->dteEnd->setDateTime(QDateTime::currentDateTime());
+
+    //连接用户数据库（本地测试数据库）
+    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
+    db.setHostName("localhost");
+    db.setPort(3306);
+    db.setDatabaseName("mei2");
+    db.setUserName("tangjun");
+    db.setPassword("123456");
+    if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
+       QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
+       QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
+       return;
+    }
+
+    qDebug() << "meetRoomID = " << meetRoomID;
+
+    //查询并设置该会议室的最大人员容纳量
+    QString sql = QString("select meetroom_num from meet_room where meetroom_id = %1").arg(meetRoomID);
+    QSqlQuery query(db);
+    query.exec(sql);
+
+    if (!query.first()) {
+        QMessageBox::warning(this, tr("warning"), tr("The meeting room was not found."));
+    } else {
+        ui->sbMeetNum->setMaximum(query.value(0).toInt());
+        ui->sbMeetNum->setValue(query.value(0).toInt());
+    }
+
+    db.close();
+    QSqlDatabase::removeDatabase(db.connectionName());
 }

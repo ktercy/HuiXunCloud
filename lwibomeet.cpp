@@ -1,6 +1,7 @@
 #include "lwibomeet.h"
 #include "ui_lwibomeet.h"
 #include "bookmeet.h"
+#include <QDebug>
 
 lwiBoMeet::lwiBoMeet(QWidget *parent) :
     QWidget(parent),
@@ -25,8 +26,18 @@ QLabel *lwiBoMeet::getLabMeetRoomAddr()
     return ui->labMeetRoomAddr;
 }
 
+void lwiBoMeet::setUserID(int uID)
+{
+    userID = uID;
+}
+
+void lwiBoMeet::setMeetRoomID(int mrID)
+{
+    meetRoomID = mrID;
+}
+
 void lwiBoMeet::on_btnBook_clicked()
 {
-    BookMeet* bootMeet = new BookMeet(this);
+    BookMeet* bootMeet = new BookMeet(userID, meetRoomID, this);
     bootMeet->exec();
 }

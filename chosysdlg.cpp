@@ -8,7 +8,7 @@ ChoSysDlg::ChoSysDlg(QWidget *parent) :
     ui(new Ui::ChoSysDlg)
 {
     ui->setupUi(this);
-    ui->rbtClassSys->setChecked(true);  //默认选中课堂系统
+    ui->rbtMeetSys->setChecked(true);  //默认选中课堂系统
 }
 
 ChoSysDlg::~ChoSysDlg()

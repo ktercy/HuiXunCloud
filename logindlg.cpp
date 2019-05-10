@@ -117,6 +117,7 @@ void LogInDlg::getRes(int res){
     else if ( res == 2) {   //用户选择会议系统，则显示会议系统界面
         //显示会议系统
         emit posUsID(userID);
+        meetSys->displayMeetRooms();
         meetSys->show();
         qDebug() << "show meet system window";
     }

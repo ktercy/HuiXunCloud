@@ -15,7 +15,7 @@ MeetSys::MeetSys(QWidget *parent) :
 {
     ui->setupUi(this);
     qDebug() << "this is meetsys window!";
-    displayMeetRooms();
+//    displayMeetRooms();
 }
 
 MeetSys::~MeetSys()
@@ -33,38 +33,43 @@ void MeetSys::displayMeetRooms()
     db.setUserName("tangjun");
     db.setPassword("123456");
     if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
-       QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
-       QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
-       return;
+        QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
+        QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
+        return;
     }
 
     //从数据库中查询所有会议室的名称和地址
     QString sql = QString("select meetroom_id, meetroom_name, meetroom_addr from meet_room");
     QSqlQuery query(db);
     query.exec(sql);
-//    QStringList meetNames;
+    //    QStringList meetNames;
 
     if (!query.first()){
         QMessageBox::warning(this, tr("warning"), tr("query error!"));
     }else {
         //将所有会议室到名称和地址地址放到QListWidget中去
         for (int i = 0; i < query.size(); i++){
-            QListWidgetItem *item = new QListWidgetItem;
+            QListWidgetItem *item = new QListWidgetItem();
             item->setSizeHint(QSize(500,60));
-            if(i%2 == 0) {
+            if(i%2 == 0) {  //每隔一条会议室信息，将背景色设置为灰色，方便用户辨认
                 item->setBackgroundColor(QColor(240, 240, 240));
             }
             ui->lwBoMeet->addItem(item);
-            lwiBoMeet *boMeetItem = new lwiBoMeet;
+            lwiBoMeet *boMeetItem = new lwiBoMeet(ui->lwBoMeet);
+            //设置每一个列表项的用户id和会议室id
+            boMeetItem->setUserID(userID);
+            boMeetItem->setMeetRoomID(query.value(0).toInt());
+            //设置每一个列表项的会议室名称和地址
             boMeetItem->getLabMeetRoomName()->setText(query.value(1).toString().trimmed());
             boMeetItem->getLabMeetRoomAddr()->setText(query.value(2).toString().trimmed());
+            //关联item和boMeetItem，以在界面中显示自定义的boMeetItem
             ui->lwBoMeet->setItemWidget(item, boMeetItem);
-//            meetNames << query.value(1).toString().trimmed();
+            //            meetNames << query.value(1).toString().trimmed();
             query.next();
         }
     }
 
-//    ui->lwBoMeet->addItems(meetNames);  //将会议室名称导入到窗口中的listWidget中去
+    //    ui->lwBoMeet->addItems(meetNames);  //将会议室名称导入到窗口中的listWidget中去
     //    for(int i = 0; i< meetNames.size();++i)
     //    {
     //        QString tmp = meetNames.at(i);

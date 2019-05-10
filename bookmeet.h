@@ -12,7 +12,7 @@ class BookMeet : public QDialog
     Q_OBJECT
 
 public:
-    explicit BookMeet(QWidget *parent = nullptr);
+    explicit BookMeet(int uID, int mrID, QWidget *parent = nullptr);
     ~BookMeet();
 
 private slots:
@@ -20,7 +20,11 @@ private slots:
 
 private:
     Ui::BookMeet *ui;
+    int userID;    //用户ID
+    int meetRoomID;   //会议室ID
     double meetDura;   //会议时长，以小时为单位，不能超过4小时
+
+    void setDisplay();  //设置界面中要显示的内容
 };
 
 #endif // BOOKMEET_H
