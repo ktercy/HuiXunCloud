@@ -7,6 +7,8 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QMessageBox>
+#include <QDateTime>
+#include <QTableWidgetItem>
 
 BookMeet::BookMeet(int uID, int mrID, QWidget *parent) :
     QDialog(parent),
@@ -69,8 +71,6 @@ void BookMeet::setDisplay()
        return;
     }
 
-    qDebug() << "meetRoomID = " << meetRoomID;
-
     //查询并设置该会议室的最大人员容纳量
     QString sql = QString("select meetroom_num from meet_room where meetroom_id = %1").arg(meetRoomID);
     QSqlQuery query(db);
@@ -81,6 +81,25 @@ void BookMeet::setDisplay()
     } else {
         ui->sbMeetNum->setMaximum(query.value(0).toInt());
         ui->sbMeetNum->setValue(query.value(0).toInt());
+    }
+
+    //显示正在召开的会议
+    QString curDT = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");  //以字符串保存当前时间
+    sql = QString("select meet_id, app_u_id, meet_title, meet_num, start_time, end_time from meet_app where app_r_id = %1 and start_time <= '%2' and end_time > '%2'").arg(meetRoomID).arg(curDT);
+    query.exec(sql);
+    if (!query.first()) {
+        QMessageBox::warning(this, tr("warning"), tr("Query meeting under way fault."));
+    } else {
+        //给tableWidget添加一行，以显示当前正在召开的会议
+        int rowCount = ui->twMeetings->rowCount();
+        ui->twMeetings->setRowCount(rowCount+1);
+        //向添加的行中填写数据
+        int rowIndex = ui->twMeetings->rowCount() - 1;
+        ui->twMeetings->setItem(rowIndex, 0, new QTableWidgetItem(query.value(1).toString()));  //向新增行中写入会议申请人
+        ui->twMeetings->setItem(rowIndex, 1, new QTableWidgetItem(query.value(2).toString()));  //向新增行中写入会议主题
+        ui->twMeetings->setItem(rowIndex, 2, new QTableWidgetItem(query.value(3).toString()));  //向新增行中写入参会人数
+        ui->twMeetings->setItem(rowIndex, 3, new QTableWidgetItem(query.value(4).toString()));  //向新增行中写入会议开始时间
+        ui->twMeetings->setItem(rowIndex, 4, new QTableWidgetItem(query.value(5).toString()));  //向新增行中写入会议结束时间
     }
 
     db.close();
