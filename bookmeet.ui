@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>630</width>
-    <height>562</height>
+    <height>608</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -465,6 +465,9 @@
    </item>
    <item>
     <widget class="QTableWidget" name="twMeetings">
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
+     </property>
      <column>
       <property name="text">
        <string>申请人</string>
