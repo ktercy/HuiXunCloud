@@ -16,8 +16,8 @@ MeetSys::MeetSys(QWidget *parent) :
     ui(new Ui::MeetSys)
 {
     ui->setupUi(this);
-    qDebug() << "this is meetsys window!";
-    //    displayMeetRooms();
+
+    ui->twPerCen->expandAll();
 }
 
 MeetSys::~MeetSys()
