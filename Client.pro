@@ -33,7 +33,8 @@ SOURCES += \
     edituserinfo.cpp \
     meetsys.cpp \
     lwibomeet.cpp \
-    bookmeet.cpp
+    bookmeet.cpp \
+    lwimeeting.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -45,7 +46,8 @@ HEADERS += \
     edituserinfo.h \
     meetsys.h \
     lwibomeet.h \
-    bookmeet.h
+    bookmeet.h \
+    lwimeeting.h
 
 FORMS += \
         mainwindow.ui \
@@ -55,7 +57,8 @@ FORMS += \
     edituserinfo.ui \
     meetsys.ui \
     lwibomeet.ui \
-    bookmeet.ui
+    bookmeet.ui \
+    lwimeeting.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

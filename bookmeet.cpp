@@ -87,12 +87,14 @@ void BookMeet::setDisplay()
 
     //将提示信息的文本颜色设置为红色
     QPalette pa;
-    pa.setColor(QPalette::WindowText,Qt::red);
+    pa.setColor(QPalette::WindowText, Qt::red);
+    ui->labNote->setPalette(pa);
 
     //显示正在召开的会议、将要召开的会议、已经取消的会议
     ui->twMeetings->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //设置列表根据内容自动设置列宽
     QString curDTStr = curDT.toString("yyyy-MM-dd hh:mm");  //以字符串保存当前时间
-    sql = QString("select meet_id, app_u_id, meet_title, meet_num, start_time, end_time, operate from meet_app where app_r_id = %1  and end_time > '%2'").arg(meetRoomID).arg(curDTStr);
+    sql = QString("select meet_id, app_u_id, meet_title, meet_num, start_time, end_time, operate from meet_app "
+                  "where pay = 1 and app_r_id = %1  and end_time > '%2'").arg(meetRoomID).arg(curDTStr);
     query.exec(sql);
     while (query.next()) {
         //给tableWidget添加一行，以显示会议概览
@@ -118,7 +120,7 @@ void BookMeet::setDisplay()
         twiSTime->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         twiETime->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
-        if (query.value(4).toString() <= curDTStr ) { //当该会议开始时间小于等于当前时间时（即该会议正在召开），将背景色改为红色
+        if (query.value(4).toString() <= curDTStr ) { //当该会议结束时间小于等于当前时间时（即该会议正在召开），将背景色改为红色
             twiUser->setBackgroundColor(QColor(251,174, 148));
             twiTitle->setBackgroundColor(QColor(251,174, 148));
             twiNum->setBackgroundColor(QColor(251,174, 148));

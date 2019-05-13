@@ -15,7 +15,7 @@ public:
     explicit MeetSys(QWidget *parent = nullptr);
     ~MeetSys();
 
-    void displayMeetRooms();
+    void displayMeetings();    //显示会议室和会议预约信息
 
 public slots:
     void getUsID(int usID);
