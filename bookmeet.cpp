@@ -35,28 +35,30 @@ void BookMeet::setMeetDura()
     QDateTime end = ui->dteEnd->dateTime();
     double temp = start.secsTo(end) / 3600.0; //获取到从会议开始到会议结束的小时数
     temp = round(temp * 100) / 100; //四舍五入保留两位小数
+    meetDura = temp;
+    ui->labMeetDura->setText(QString::number(meetDura, 'f', 2));    //更改界面上的会议时常标签
 
-    if (temp < 0) {
-        QMessageBox::warning(this, tr("warning"), tr("The end time must be greater than the start time."));
-    }else if (temp > 4.0) {
-        QMessageBox::warning(this, tr("warning"), tr("The length of the meeting should not exceed 4 hours."));
+    //当时常大于4小时或小于0时，将会议时设置未红色，否则为黑色
+    QPalette pa;
+    if (meetDura < 0 || meetDura > 4) {
+        pa.setColor(QPalette::WindowText,Qt::red);
+        ui->labMeetDura->setPalette(pa);
     }else {
-        meetDura = temp;
-        ui->labMeetDura->setText(QString::number(meetDura, 'f', 2));
+        pa.setColor(QPalette::WindowText,Qt::black);
+        ui->labMeetDura->setPalette(pa);
     }
-
 }
 
 void BookMeet::setDisplay()
 {
-    //将提示信息的文本颜色设置为红色
-    QPalette pa;
-    pa.setColor(QPalette::WindowText,Qt::red);
-    ui->labNote->setPalette(pa);
+    ui->cbMeetDura->setChecked(true);   //会议时长默认选中
+    QDateTime curDT = QDateTime::currentDateTime();
 
-    //设置默认的会议开始时间和会议结束时间都为当前时间
-    ui->dteStart->setDateTime(QDateTime::currentDateTime());
-    ui->dteEnd->setDateTime(QDateTime::currentDateTime());
+    //设置默认的会议开始时间和会议结束时间都为当前时间，且最小也是当前时间
+    ui->dteStart->setDateTime(curDT);
+    ui->dteEnd->setDateTime(curDT);
+    ui->dteStart->setMinimumDateTime(curDT);
+    ui->dteEnd->setMinimumDateTime(curDT);
 
     //连接用户数据库（本地测试数据库）
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
@@ -83,11 +85,14 @@ void BookMeet::setDisplay()
         ui->sbMeetNum->setValue(query.value(0).toInt());
     }
 
-    ui->twMeetings->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //根据内容自动设置列宽
+    //将提示信息的文本颜色设置为红色
+    QPalette pa;
+    pa.setColor(QPalette::WindowText,Qt::red);
 
     //显示正在召开的会议、将要召开的会议、已经取消的会议
-    QString curDT = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");  //以字符串保存当前时间
-    sql = QString("select meet_id, app_u_id, meet_title, meet_num, start_time, end_time, operate from meet_app where app_r_id = %1  and end_time > '%2'").arg(meetRoomID).arg(curDT);
+    ui->twMeetings->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //设置列表根据内容自动设置列宽
+    QString curDTStr = curDT.toString("yyyy-MM-dd hh:mm");  //以字符串保存当前时间
+    sql = QString("select meet_id, app_u_id, meet_title, meet_num, start_time, end_time, operate from meet_app where app_r_id = %1  and end_time > '%2'").arg(meetRoomID).arg(curDTStr);
     query.exec(sql);
     while (query.next()) {
         //给tableWidget添加一行，以显示会议概览
@@ -113,13 +118,13 @@ void BookMeet::setDisplay()
         twiSTime->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         twiETime->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
-        if (query.value(4).toString() <= curDT ) { //当该会议开始时间小于等于当前时间时（即该会议正在召开），将背景色改为红色
+        if (query.value(4).toString() <= curDTStr ) { //当该会议开始时间小于等于当前时间时（即该会议正在召开），将背景色改为红色
             twiUser->setBackgroundColor(QColor(251,174, 148));
             twiTitle->setBackgroundColor(QColor(251,174, 148));
             twiNum->setBackgroundColor(QColor(251,174, 148));
             twiSTime->setBackgroundColor(QColor(251,174, 148));
             twiETime->setBackgroundColor(QColor(251,174, 148));
-        } else if (query.value(4).toString() > curDT ) {   //当该会议开始时间大于于当前时间时（即该会议即将召开），将背景色改为蓝色
+        } else if (query.value(4).toString() > curDTStr ) {   //当该会议开始时间大于于当前时间时（即该会议即将召开），将背景色改为蓝色
             twiUser->setBackgroundColor(QColor(213, 243, 244));
             twiTitle->setBackgroundColor(QColor(213, 243, 244));
             twiNum->setBackgroundColor(QColor(213, 243, 244));
@@ -144,8 +149,78 @@ void BookMeet::setDisplay()
         ui->twMeetings->setItem(rowIndex, 2, twiNum);  //向新增行中写入参会人数
         ui->twMeetings->setItem(rowIndex, 3, twiSTime);  //向新增行中写入会议开始时间
         ui->twMeetings->setItem(rowIndex, 4, twiETime);  //向新增行中写入会议结束时间
+
     }
 
+    db.close();
+    QSqlDatabase::removeDatabase(db.connectionName());
+
+    ui->twMeetings->sortItems(3, Qt::AscendingOrder);   //根据会议开始时间升序排序所有已存在的会议预约信息
+}
+
+void BookMeet::on_btnCommit_clicked()
+{
+    //获取用户输入的会议预约信息
+    QString meetTitle = ui->leMeetTitle->text().trimmed();
+    QString meetType = ui->cbMeetType->currentText().trimmed();
+    int num = ui->sbMeetNum->value();
+    QString startTime = ui->dteStart->dateTime().toString("yyyy-MM-dd hh:mm");
+    QString endTime = ui->dteEnd->dateTime().toString("yyyy-MM-dd hh:mm");
+    double sumCost = ui->labSumCost->text().trimmed().toDouble();
+
+    //    qDebug() << meetTitle << meetType << num << startTime.toString("yyyy-MM-dd hh:mm") << endTime.toString("yyyy-MM-dd hh:mm") << sumCost;
+
+    //确认用户输入的信息是否正确
+    if (meetTitle.isEmpty()) {  //如果会议主题为空，则提醒用户填写
+        QMessageBox::warning(this, tr("warning"), tr("Meet title can't be empty!"));
+        ui->leMeetTitle->clear();
+        ui->leMeetTitle->setFocus();
+        return;
+    } else if (meetDura < 0 || meetDura > 4) {  //当用户预约的时长大于4小时或小于0时，提醒用户
+        QMessageBox::warning(this, tr("warning"), tr("Meetings must be longer than 0 hours and less than 4 hours"));
+    } else {    //确认用户的预约与已存在的会议预约是否冲突
+        QTableWidgetItem *twiS =nullptr;
+        QTableWidgetItem *twiE = nullptr;
+        for (int i = 0; i < ui->twMeetings->rowCount(); i++)
+        {
+            twiS = ui->twMeetings->item(i, 3);   //获取这一条已存在预约信息的开始时间
+            if (twiS->font().strikeOut()) {  //如果这一条已存在预约已经被取消，则直接检测下一条预约信息
+                continue;
+            } else{
+                twiE = ui->twMeetings->item(i, 4);  //获取这已存在一条预约信息的结束时间
+                //当用户的预约时间与已存在的预约时间重叠或存在包含时，提醒用户
+                if ((startTime >= twiS->text() && startTime <= twiE->text()) ||
+                        (endTime >= twiS->text() && endTime <= twiE->text()) ||
+                        (startTime <= twiS->text() && endTime >= twiE->text())) {
+                    QMessageBox::warning(this, tr("waring"), tr("Your appointment conflicts with others!"));
+                    return;
+                }
+            }
+        }
+    }
+
+    //将用户填写的正确预约信息写入数据库中
+    //连接用户数据库（本地测试数据库）
+    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
+    db.setHostName("localhost");
+    db.setPort(3306);
+    db.setDatabaseName("mei2");
+    db.setUserName("tangjun");
+    db.setPassword("123456");
+    if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
+        QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
+        QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
+        return;
+    }
+
+    QSqlQuery query(db);
+    QString sql = QString("insert into meet_app (app_u_id, app_r_id, meet_title, meet_num, start_time, end_time, people, sum, assort_id) "
+                          "value (%1, %2, '%3', %4, '%5', '%6', '', %7, 1)").arg(userID).arg(meetRoomID).arg(meetTitle).arg(num).arg(startTime).arg(endTime).arg(sumCost);
+    if (query.exec(sql)) {
+        QMessageBox::information(this, tr("info"), tr("预约会议成功，请等待商家确认"));
+    } else {
+        qDebug() << query.lastError();
+    }
 
     db.close();
     QSqlDatabase::removeDatabase(db.connectionName());

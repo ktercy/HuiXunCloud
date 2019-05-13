@@ -18,6 +18,8 @@ public:
 private slots:
     void setMeetDura(); //根据用户的输入自动计算出会议时长
 
+    void on_btnCommit_clicked();
+
 private:
     Ui::BookMeet *ui;
     int userID;    //用户ID

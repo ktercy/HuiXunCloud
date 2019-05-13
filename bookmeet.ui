@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>630</width>
-    <height>608</height>
+    <height>585</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -300,7 +300,7 @@
        </widget>
       </item>
       <item row="1" column="7">
-       <widget class="QLabel" name="label_16">
+       <widget class="QLabel" name="labDuraCost">
         <property name="text">
          <string>0.00</string>
         </property>
@@ -310,7 +310,7 @@
        </widget>
       </item>
       <item row="4" column="7">
-       <widget class="QLabel" name="label_11">
+       <widget class="QLabel" name="labSumCost">
         <property name="text">
          <string>0.00</string>
         </property>
