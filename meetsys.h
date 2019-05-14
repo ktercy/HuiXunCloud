@@ -20,9 +20,13 @@ public:
 public slots:
     void getUsID(int usID);
 
+private slots:
+    void on_btnBusiLogIn_clicked();
+
 private:
     Ui::MeetSys *ui;
-    int userID;
+    int userID; //普通用户ID
+    int busiUserID; //商家用户ID
 };
 
 #endif // MEETSYS_H

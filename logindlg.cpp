@@ -95,7 +95,6 @@ void LogInDlg::on_logInBtn_clicked()
 
     db.close(); //关闭连接
     QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
-    return;
 }
 
 void LogInDlg::on_exitBtn_clicked()

@@ -17,7 +17,7 @@ MeetSys::MeetSys(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->twPerCen->expandAll();
+    ui->twPerCenter->expandAll();
 }
 
 MeetSys::~MeetSys()
@@ -98,4 +98,61 @@ void MeetSys::displayMeetings()
 void MeetSys::getUsID(int usID)
 {
     userID = usID;
+}
+
+void MeetSys::on_btnBusiLogIn_clicked()
+{
+    QString userName;
+    QString pwd;
+    userName = ui->leBusiUserName->text().trimmed();  //获取输入的用户名
+    pwd = ui->leBusiPwd->text();  //获取输入的密码
+
+    //判断用户名和密码是否为空,若为空，则弹出窗口警告
+    if (userName == "") {
+        QMessageBox::warning(this, tr("Warning"), tr("User name cann't be empty!"), QMessageBox::Yes);
+        ui->leBusiUserName->clear();
+        ui->leBusiUserName->setFocus();
+        return;
+    }else if (pwd == "") {
+        QMessageBox::warning(this, tr("Warning"), tr("Password cann't be empty!"), QMessageBox::Yes);
+        ui->leBusiPwd->clear();
+        ui->leBusiPwd->setFocus();
+        return;
+    }
+
+    //连接用户数据库（本地测试数据库）
+    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
+    db.setHostName("localhost");
+    db.setPort(3306);
+    db.setDatabaseName("mei2");
+    db.setUserName("tangjun");
+    db.setPassword("123456");
+    if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
+       QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
+       QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
+       return;
+    }
+
+    //查询数据库中此用户是否存在
+    QString sql = QString("select company_pwd, company_id from company_info where company_name = '%1'").arg(userName);
+    QSqlQuery query(db);
+    query.exec(sql);
+    if (!query.first()) {   //用户不存在
+        qDebug() << query.lastError().text();
+        QMessageBox::warning(this, tr("Warning"), tr("This user dosen't exist!"), QMessageBox::Yes);
+        ui->leBusiUserName->clear();
+        ui->leBusiUserName->setFocus();
+    } else if (pwd != query.value(0).toString()) {  //用户存在但密码不正确
+        QMessageBox::warning(this, tr("Warning"), tr("Incorrect password!"), QMessageBox::Yes);
+        ui->leBusiPwd->clear();
+        ui->leBusiPwd->setFocus();
+    } else if (pwd == query.value(0).toString()) {  //用户存在且密码正确
+        busiUserID = query.value(1).toInt();    //获取登录成功的用户的ID
+        ui->swBusiPlatForm->setCurrentIndex(1); //显示商家中心界面
+    } else {    //其他未知错误
+        QMessageBox::warning(this, tr("Warning"), tr("Unknown error!"), QMessageBox::Yes);
+    }
+
+    db.close(); //关闭连接
+    QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
 }
