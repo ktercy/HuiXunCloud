@@ -53,7 +53,7 @@ void MainWindow::displayUsInfo(){
     db.setPassword("123456");
     if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
        QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
-       QSqlDatabase::removeDatabase("conLogIn");   //移除连接
+       QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
        return;
     }
 
@@ -73,7 +73,7 @@ void MainWindow::displayUsInfo(){
         ui->labRTimeData->setText(query.value(4).toString());
     }
     db.close();
-    QSqlDatabase::removeDatabase("conLogIn");   //移除连接
+    QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
 }
 
 

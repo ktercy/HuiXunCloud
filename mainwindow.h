@@ -18,11 +18,11 @@ public:
     void displayUsInfo();
 
 public slots:
-    void switchPage(QTreeWidgetItem * twi);
     void getUsID(int usID);
 
 private slots:
     void on_btnEditData_clicked();
+    void switchPage(QTreeWidgetItem * twi);
 
 private:
     Ui::MainWindow *ui;

@@ -97,14 +97,15 @@ void BookMeet::setDisplay()
                   "where pay = 1 and app_r_id = %1  and end_time > '%2'").arg(meetRoomID).arg(curDTStr);
     query.exec(sql);
     while (query.next()) {
+        QSqlQuery query2(db);
+        query2.exec(QString("select us_name from user_info where us_id = %1").arg(query.value(1).toInt()));
+        query2.first();
+
         //给tableWidget添加一行，以显示会议概览
         int rowCount = ui->twMeetings->rowCount();
         ui->twMeetings->setRowCount(rowCount+1);
         int rowIndex = ui->twMeetings->rowCount() - 1;  //新增行的索引
 
-        QSqlQuery query2(db);
-        query2.exec(QString("select us_name from user_info where us_id = %1").arg(query.value(1).toInt()));
-        query2.first();
 
         //定义这一行所拥有的单元格，并初始化单元格的内容
         QTableWidgetItem *twiUser = new QTableWidgetItem(query2.value(0).toString());    //申请人
