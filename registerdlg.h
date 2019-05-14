@@ -12,7 +12,7 @@ class RegisterDlg : public QDialog
     Q_OBJECT
 
 public:
-    explicit RegisterDlg(QWidget *parent = nullptr);
+    explicit RegisterDlg(int rType, QWidget *parent = nullptr);
     ~RegisterDlg();
 
 private slots:
@@ -21,6 +21,7 @@ private slots:
 
 private:
     Ui::RegisterDlg *ui;
+    int regiType;   //注册类型，如果是普通用户注册，值设为1，商家用户注册，值设为2
 };
 
 #endif // REGISTERDLG_H

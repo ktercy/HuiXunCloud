@@ -104,7 +104,7 @@ void LogInDlg::on_exitBtn_clicked()
 
 void LogInDlg::on_registerBtn_clicked()
 {
-    RegisterDlg *regDlg = new RegisterDlg(this);
+    RegisterDlg *regDlg = new RegisterDlg(1, this);
     regDlg->exec();
 }
 

@@ -351,7 +351,7 @@
         <item>
          <widget class="QStackedWidget" name="swUserCenter">
           <property name="currentIndex">
-           <number>0</number>
+           <number>3</number>
           </property>
           <widget class="QWidget" name="pUserInfo">
            <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -942,7 +942,7 @@
             <item>
              <widget class="QStackedWidget" name="swBusiCenter">
               <property name="currentIndex">
-               <number>1</number>
+               <number>4</number>
               </property>
               <widget class="QWidget" name="pBusiInfo">
                <layout class="QVBoxLayout" name="verticalLayout_11">

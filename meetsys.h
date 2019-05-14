@@ -23,6 +23,8 @@ public slots:
 private slots:
     void on_btnBusiLogIn_clicked();
 
+    void on_btnBusiRegi_clicked();
+
 private:
     Ui::MeetSys *ui;
     int userID; //普通用户ID

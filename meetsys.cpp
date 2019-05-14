@@ -2,6 +2,7 @@
 #include "ui_meetsys.h"
 #include "lwibomeet.h"
 #include "lwimeeting.h"
+#include "registerdlg.h"
 #include <QSqlDatabase> //连接数据库
 #include <QSqlQuery>    //执行sql语句
 #include <QDebug>
@@ -41,7 +42,7 @@ void MeetSys::displayMeetings()
     }
 
     //从数据库中查询所有会议室的名称和地址
-    QString sql = QString("select meetroom_id, meetroom_name, meetroom_addr from meet_room");
+    QString sql = QString("select meetroom_id, meetroom_name, meetroom_addr from meet_room where meetroom_status = 1");
     QSqlQuery query(db);
     query.exec(sql);
 
@@ -155,4 +156,10 @@ void MeetSys::on_btnBusiLogIn_clicked()
 
     db.close(); //关闭连接
     QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
+}
+
+void MeetSys::on_btnBusiRegi_clicked()
+{
+    RegisterDlg *regDlg = new RegisterDlg(2, this);
+    regDlg->exec();
 }
