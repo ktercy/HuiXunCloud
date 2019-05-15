@@ -957,7 +957,7 @@
             <item>
              <widget class="QStackedWidget" name="swBusiCenter">
               <property name="currentIndex">
-               <number>1</number>
+               <number>2</number>
               </property>
               <widget class="QWidget" name="pBusiInfo">
                <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -1290,14 +1290,14 @@
               <widget class="QWidget" name="pMRSubmitted">
                <layout class="QVBoxLayout" name="verticalLayout_12">
                 <item>
-                 <widget class="QLabel" name="label_17">
+                 <widget class="QLabel" name="labMRSubmitted">
                   <property name="text">
                    <string>已提交会场</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QTableWidget" name="tableWidget_6">
+                 <widget class="QTableWidget" name="twMRSubmitted">
                   <column>
                    <property name="text">
                     <string>会场名</string>
@@ -1318,16 +1318,6 @@
                     <string>审核</string>
                    </property>
                   </column>
-                  <column>
-                   <property name="text">
-                    <string>已上线会场</string>
-                   </property>
-                  </column>
-                  <column>
-                   <property name="text">
-                    <string>管理上线会场</string>
-                   </property>
-                  </column>
                  </widget>
                 </item>
                </layout>
@@ -1335,14 +1325,14 @@
               <widget class="QWidget" name="pMROnLine">
                <layout class="QVBoxLayout" name="verticalLayout_13">
                 <item>
-                 <widget class="QLabel" name="label_18">
+                 <widget class="QLabel" name="labMROnLine">
                   <property name="text">
                    <string>已上线会场</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QTableWidget" name="tableWidget_7">
+                 <widget class="QTableWidget" name="twMROnLine">
                   <column>
                    <property name="text">
                     <string>会场名</string>
@@ -1375,14 +1365,14 @@
               <widget class="QWidget" name="pManaOnLineMR">
                <layout class="QVBoxLayout" name="verticalLayout_14">
                 <item>
-                 <widget class="QLabel" name="label_19">
+                 <widget class="QLabel" name="labManaOnLineMR">
                   <property name="text">
                    <string>管理上线会场</string>
                   </property>
                  </widget>
                 </item>
                 <item>
-                 <widget class="QTableWidget" name="tableWidget_8">
+                 <widget class="QTableWidget" name="twManaOnLineMR">
                   <column>
                    <property name="text">
                     <string>会场名</string>

@@ -604,12 +604,120 @@ void MeetSys::updateBusiInfo()
 
 void MeetSys::updateMRSubmitted()
 {
+    ui->twMRSubmitted->clearContents();    //清空已有数据
+    ui->twMRSubmitted->setRowCount(0); //清空已有行
 
+    //连接用户数据库（本地测试数据库）
+    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
+    db.setHostName("localhost");
+    db.setPort(3306);
+    db.setDatabaseName("mei2");
+    db.setUserName("tangjun");
+    db.setPassword("123456");
+    if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
+        QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
+        QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
+        return;
+    }
+
+    ui->twMRSubmitted->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //设置列表根据内容自动设置列宽
+
+    //查询已提交预约
+    QSqlQuery query(db);
+    QString sql = QString("select meetroom_name, meetroom_addr, meetroom_num, meetroom_status from meet_room where meetroom_c_id = %1").arg(busiUserID);
+    query.exec(sql);
+
+    while (query.next()) {
+        //给tableWidget添加一行，以显示会议概览
+        int rowCount = ui->twMRSubmitted->rowCount();
+        ui->twMRSubmitted->setRowCount(rowCount+1);
+        int rowIndex = ui->twMRSubmitted->rowCount() - 1;  //新增行的索引
+
+        //定义这一行所拥有的单元格，并初始化单元格的内容
+        QTableWidgetItem *twiMRName = new QTableWidgetItem(query.value(0).toString());
+        QTableWidgetItem *twiMRAddr = new QTableWidgetItem(query.value(1).toString());
+        QTableWidgetItem *twiMRNum = new QTableWidgetItem(query.value(2).toString());
+        QString status;
+        if (query.value(3).toInt() == 0) { status = "待审核"; }
+        else if (query.value(3).toInt() == 1) { status = "同意"; }
+        QTableWidgetItem *twiMRStatus = new QTableWidgetItem(status);
+
+        //设置这一行所有单元格的文本对齐格式为上下居中和左右居中
+        twiMRName->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        twiMRAddr->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        twiMRNum->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        twiMRStatus->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+        ui->twMRSubmitted->setItem(rowIndex, 0, twiMRName);
+        ui->twMRSubmitted->setItem(rowIndex, 1, twiMRAddr);
+        ui->twMRSubmitted->setItem(rowIndex, 2, twiMRNum);
+        ui->twMRSubmitted->setItem(rowIndex, 3, twiMRStatus);
+    }
+
+    db.close();
+    QSqlDatabase::removeDatabase(db.connectionName());
 }
 
 void MeetSys::updateMROnLine()
 {
+    ui->twMROnLine->clearContents();    //清空已有数据
+    ui->twMROnLine->setRowCount(0); //清空已有行
 
+    //连接用户数据库（本地测试数据库）
+    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
+    db.setHostName("localhost");
+    db.setPort(3306);
+    db.setDatabaseName("mei2");
+    db.setUserName("tangjun");
+    db.setPassword("123456");
+    if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
+        QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
+        QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
+        return;
+    }
+
+    ui->twMROnLine->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //设置列表根据内容自动设置列宽
+
+    //查询已上线会场
+    QSqlQuery query(db);
+    QString sql = QString("select meetroom_id, meetroom_name, meetroom_addr, meetroom_num "
+                          "from meet_room where meetroom_status = 1 and meetroom_c_id = %1").arg(busiUserID);
+    query.exec(sql);
+
+    while (query.next()) {
+        //给tableWidget添加一行，以显示会议概览
+        int rowCount = ui->twMROnLine->rowCount();
+        ui->twMROnLine->setRowCount(rowCount+1);
+        int rowIndex = ui->twMROnLine->rowCount() - 1;  //新增行的索引
+
+        //定义这一行所拥有的单元格，并初始化单元格的内容
+        QTableWidgetItem *twiMRName = new QTableWidgetItem(query.value(1).toString());
+        QTableWidgetItem *twiMRAddr = new QTableWidgetItem(query.value(2).toString());
+        QTableWidgetItem *twiMRNum = new QTableWidgetItem(query.value(3).toString());
+        QPushButton *btnMeetSub = new QPushButton(ui->twMROnLine);
+        btnMeetSub->setText("查看");
+
+        QPushButton *btnMeetSta = new QPushButton(ui->twMROnLine);
+        QString curDTStr = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
+        QSqlQuery query2(db);   //查询该会议室的待处理预约数量
+        sql = QString("select meet_id from meet_app where app_r_id = %1 and pay =0 and operate = 1 and start_time > '%2'").arg(query.value(0).toInt()).arg(curDTStr);
+        qDebug() << query2.exec(sql);
+        btnMeetSta->setText(QString::number(query2.size()));
+
+        //设置这一行所有单元格的文本对齐格式为上下居中和左右居中
+        twiMRName->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        twiMRAddr->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+        twiMRNum->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
+
+        ui->twMROnLine->setItem(rowIndex, 0, twiMRName);
+        ui->twMROnLine->setItem(rowIndex, 1, twiMRAddr);
+        ui->twMROnLine->setItem(rowIndex, 2, twiMRNum);
+        ui->twMROnLine->setCellWidget(rowIndex, 3, btnMeetSub);
+        ui->twMROnLine->setCellWidget(rowIndex, 4, btnMeetSta);
+    }
+
+    db.close();
+    QSqlDatabase::removeDatabase(db.connectionName());
 }
 
 void MeetSys::updateManaOnLineMR()
