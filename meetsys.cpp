@@ -5,6 +5,8 @@
 #include "lwibomeet.h"
 #include "lwimeeting.h"
 #include "registerdlg.h"
+#include "mybtn.h"
+
 #include <QSqlDatabase> //连接数据库
 #include <QSqlQuery>    //执行sql语句
 #include <QDebug>
@@ -372,8 +374,6 @@ void MeetSys::updateMeetSubmitted()
         else if (query.value(4).toInt() == -1) { status = "交易失败"; }
         QTableWidgetItem *twiMeetStatus= new QTableWidgetItem(status);
 
-        qDebug() << "test---" << twiMeetTitle->text();
-
         //设置这一行所有单元格的文本对齐格式为上下居中和左右居中
         twiMeetName->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
         twiMeetAddr->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -417,10 +417,9 @@ void MeetSys::updateMeetWillHeld()
 
     //查询已提交预约
     QSqlQuery query(db);
-    QString sql = QString("select app_r_id, meet_title, start_time, end_time, pay from meet_app"
+    QString sql = QString("select app_r_id, meet_title, start_time, end_time, pay, meet_id from meet_app"
                           " where app_u_id = %1 and pay = 1 and start_time > '%2'").arg(userID).arg(curDTStr);
     query.exec(sql);
-
     while (query.next()) {
         QSqlQuery query2(db);
         sql = QString("select meetroom_name, meetroom_addr from meet_room where meetroom_id = %1").arg(query.value(0).toInt());
@@ -430,14 +429,14 @@ void MeetSys::updateMeetWillHeld()
         int rowCount = ui->twMeetWillHeld->rowCount();
         ui->twMeetWillHeld->setRowCount(rowCount+1);
         int rowIndex = ui->twMeetWillHeld->rowCount() - 1;  //新增行的索引
-
         //定义这一行所拥有的单元格，并初始化单元格的内容
         QTableWidgetItem *twiMeetName = new QTableWidgetItem(query2.value(0).toString());
         QTableWidgetItem *twiMeetAddr = new QTableWidgetItem(query2.value(1).toString());
         QTableWidgetItem *twiMeetTitle = new QTableWidgetItem(query.value(1).toString());
         QTableWidgetItem *twiMeetTime = new QTableWidgetItem(query.value(2).toString() + "--" + query.value(3).toString());
-        QPushButton *btnCancel = new QPushButton(ui->twMeetWillHeld);
-        btnCancel->setText("取消");
+        MyBtn *btnCancel = new MyBtn(btnFunType::meet_will_held, ui->twMeetWillHeld);   //定义MyBtn并设置其功能类型为meet_will_held，后面以此类推
+        btnCancel->setText("取消会议");
+        btnCancel->setMeetID(query.value(5).toInt());
 
         //设置这一行所有单元格的文本对齐格式为上下居中和左右居中
         twiMeetName->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
@@ -694,15 +693,17 @@ void MeetSys::updateMROnLine()
         QTableWidgetItem *twiMRName = new QTableWidgetItem(query.value(1).toString());
         QTableWidgetItem *twiMRAddr = new QTableWidgetItem(query.value(2).toString());
         QTableWidgetItem *twiMRNum = new QTableWidgetItem(query.value(3).toString());
-        QPushButton *btnMeetSub = new QPushButton(ui->twMROnLine);
+        MyBtn *btnMeetSub = new MyBtn(BtnFunType::mr_online_check, ui->twMROnLine);
         btnMeetSub->setText("查看");
+        btnMeetSub->setMeetRoomID(query.value(0).toInt());
 
-        QPushButton *btnMeetSta = new QPushButton(ui->twMROnLine);
+        MyBtn *btnMeetSta = new MyBtn(BtnFunType::mr_online_status, ui->twMROnLine);
         QString curDTStr = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
         QSqlQuery query2(db);   //查询该会议室的待处理预约数量
         sql = QString("select meet_id from meet_app where app_r_id = %1 and pay =0 and operate = 1 and start_time > '%2'").arg(query.value(0).toInt()).arg(curDTStr);
-        qDebug() << query2.exec(sql);
+        query2.exec(sql);
         btnMeetSta->setText(QString::number(query2.size()));
+        btnMeetSta->setMeetRoomID(query.value(0).toInt());
 
         //设置这一行所有单元格的文本对齐格式为上下居中和左右居中
         twiMRName->setTextAlignment(Qt::AlignHCenter | Qt::AlignVCenter);

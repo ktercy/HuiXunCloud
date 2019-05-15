@@ -94,7 +94,8 @@ void BookMeet::setDisplay()
     ui->twMeetings->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //设置列表根据内容自动设置列宽
     QString curDTStr = curDT.toString("yyyy-MM-dd hh:mm");  //以字符串保存当前时间
     sql = QString("select meet_id, app_u_id, meet_title, meet_num, start_time, end_time, operate from meet_app "
-                  "where pay = 1 and app_r_id = %1  and end_time > '%2'").arg(meetRoomID).arg(curDTStr);
+                  "where ((pay = 0 and operate = 0) or (pay = 1 and operate = 1))"
+                  " and app_r_id = %1  and end_time > '%2'").arg(meetRoomID).arg(curDTStr);
     query.exec(sql);
     while (query.next()) {
         QSqlQuery query2(db);

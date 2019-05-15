@@ -34,7 +34,8 @@ SOURCES += \
     meetsys.cpp \
     lwibomeet.cpp \
     bookmeet.cpp \
-    lwimeeting.cpp
+    lwimeeting.cpp \
+    mybtn.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -47,7 +48,8 @@ HEADERS += \
     meetsys.h \
     lwibomeet.h \
     bookmeet.h \
-    lwimeeting.h
+    lwimeeting.h \
+    mybtn.h
 
 FORMS += \
         mainwindow.ui \
