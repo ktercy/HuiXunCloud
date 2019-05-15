@@ -8,7 +8,9 @@ enum BtnFunType {
     normal,
     meet_will_held,
     mr_online_check,
-    mr_online_status
+    mr_online_status,
+    agree_meet,
+    refuse_meet
 };
 }
 
@@ -31,6 +33,7 @@ private slots:
    void clickFunc();
 
 private:
+//    QWidget *parent;    //父窗口指针
     int meetRoomID; //会议室ID
     int meetID; //会议ID
     BtnFunType funcType;    //记录该按钮的功能类型，当按钮被点击时，根据不同的功能类型执行不同的操作
@@ -38,6 +41,8 @@ private:
     void cancelMeet();  //普通用户取消已成功预约的会议
     void checkMeet();   //商家用户查看自己已上线会场上的会议预约
     void confirmMeet(); //商家用户去确认普通用户提交的预约
+    void agreeMeet();   //商家用户确认普通用户提交的预约时，同意了预约
+    void refuseMeet();  //商家用户确认普通用户提交的预约时，拒绝了预约
 };
 
 #endif // MYBTN_H

@@ -16,7 +16,6 @@
 #include <QListWidgetItem>
 #include <QTableWidgetItem>
 #include <QDateTime>
-#include <QDateTime>
 
 MeetSys::MeetSys(QWidget *parent) :
     QMainWindow(parent),
@@ -39,6 +38,8 @@ MeetSys::MeetSys(QWidget *parent) :
     //绑定信号与槽，使每次点击个人中心和商家中心界面左边的索引时，右边切换到对应的功能界面
     connect(ui->twBusiCenter, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(switchBusiPage(QTreeWidgetItem*)));
     connect(ui->twPerCenter, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(switchPerPage(QTreeWidgetItem*)));
+
+
 }
 
 MeetSys::~MeetSys()
@@ -434,7 +435,7 @@ void MeetSys::updateMeetWillHeld()
         QTableWidgetItem *twiMeetAddr = new QTableWidgetItem(query2.value(1).toString());
         QTableWidgetItem *twiMeetTitle = new QTableWidgetItem(query.value(1).toString());
         QTableWidgetItem *twiMeetTime = new QTableWidgetItem(query.value(2).toString() + "--" + query.value(3).toString());
-        MyBtn *btnCancel = new MyBtn(btnFunType::meet_will_held, ui->twMeetWillHeld);   //定义MyBtn并设置其功能类型为meet_will_held，后面以此类推
+        MyBtn *btnCancel = new MyBtn(btnFunType::meet_will_held, this);   //定义MyBtn并设置其功能类型为meet_will_held，后面以此类推
         btnCancel->setText("取消会议");
         btnCancel->setMeetID(query.value(5).toInt());
 
@@ -693,11 +694,11 @@ void MeetSys::updateMROnLine()
         QTableWidgetItem *twiMRName = new QTableWidgetItem(query.value(1).toString());
         QTableWidgetItem *twiMRAddr = new QTableWidgetItem(query.value(2).toString());
         QTableWidgetItem *twiMRNum = new QTableWidgetItem(query.value(3).toString());
-        MyBtn *btnMeetSub = new MyBtn(BtnFunType::mr_online_check, ui->twMROnLine);
+        MyBtn *btnMeetSub = new MyBtn(BtnFunType::mr_online_check, this);
         btnMeetSub->setText("查看");
         btnMeetSub->setMeetRoomID(query.value(0).toInt());
 
-        MyBtn *btnMeetSta = new MyBtn(BtnFunType::mr_online_status, ui->twMROnLine);
+        MyBtn *btnMeetSta = new MyBtn(BtnFunType::mr_online_status, this);
         QString curDTStr = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
         QSqlQuery query2(db);   //查询该会议室的待处理预约数量
         sql = QString("select meet_id from meet_app where app_r_id = %1 and pay =0 and operate = 1 and start_time > '%2'").arg(query.value(0).toInt()).arg(curDTStr);
