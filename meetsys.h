@@ -28,6 +28,8 @@ private slots:
     void switchPerPage(QTreeWidgetItem *twi);   //根据商家平台中用户点击界面左部的索引，切换右边的功能界面
 
 
+    void on_btnSubmit_clicked();
+
 private:
     Ui::MeetSys *ui;
     int userID; //普通用户ID
@@ -41,7 +43,6 @@ private:
     void updateMeetUnderWay();
     void updateMeetCancelled();
     void updateBusiInfo();
-    void updateAddMR();
     void updateMRSubmitted();
     void updateMROnLine();
     void updateManaOnLineMR();

@@ -169,8 +169,10 @@ void MeetSys::on_btnBusiLogIn_clicked()
         ui->leBusiPwd->setFocus();
     } else if (pwd == query.value(0).toString()) {  //用户存在且密码正确
         busiUserID = query.value(1).toInt();    //获取登录成功的用户的ID
+        //准备登录成功后的部分界面显示
         updateBusiInfo();   //为后面显示商家信息做准备
         ui->swBusiPlatForm->setCurrentIndex(1); //显示商家中心界面
+        ui->labOwner->setText(userName);   //将添加会场功能界面的“所输入”标签内容设为登录用户的用户名
     } else {    //其他未知错误
         QMessageBox::warning(this, tr("Warning"), tr("Unknown error!"), QMessageBox::Yes);
     }
@@ -219,7 +221,6 @@ void MeetSys::switchBusiPage(QTreeWidgetItem *twi)
         updateBusiInfo();
     } else if (clicked == "添加会场") {
         ui->swBusiCenter->setCurrentIndex(1);
-        updateAddMR();
     } else if (clicked == "已提交会场") {
         ui->swBusiCenter->setCurrentIndex(2);
         updateMRSubmitted();
@@ -341,7 +342,7 @@ void MeetSys::updateMeetSubmitted()
         return;
     }
 
-//    QString curDTStr = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
+    //    QString curDTStr = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
     ui->twMeetSubmitted->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //设置列表根据内容自动设置列宽
 
     //查询已提交预约
@@ -596,16 +597,10 @@ void MeetSys::updateBusiInfo()
         ui->labBusiRTimeData->setText(query.value(3).toString());
     }
 
-    qDebug() << "updateBusiInfo";
-
     db.close();
     QSqlDatabase::removeDatabase(db.connectionName());
 }
 
-void MeetSys::updateAddMR()
-{
-
-}
 
 void MeetSys::updateMRSubmitted()
 {
@@ -623,3 +618,54 @@ void MeetSys::updateManaOnLineMR()
 }
 
 
+
+void MeetSys::on_btnSubmit_clicked()
+{
+    QString mrName = ui->leMRName->text().trimmed();
+    QString mrAddr = ui->leMRAddr->text().trimmed();
+    int mrNum = ui->sbMRNum->value();
+    bool timeIntervalOK;
+    bool baseTimeOk;
+    bool basePriceOk;
+    int timeInterval = ui->leTimeInterval->text().toInt(&timeIntervalOK);
+    int baseTime = ui->leBaseTime->text().toInt(&baseTimeOk);
+    double basePrice = ui->leBasePrice->text().toDouble(&basePriceOk);
+
+    //判断用户输入是否正确
+    if (mrName.isEmpty() || mrAddr.isEmpty()) { //会议室名或地址为空
+        QMessageBox::warning(this, tr("warning"), tr("Meet room name or address can't be empty!"));
+    } else if (mrNum <= 0) {    //会议室容纳人数小于0
+        QMessageBox::warning(this, tr("warning"), tr("Meeting room accommodation must be greater than 0"));
+    } else if (!timeIntervalOK || !baseTimeOk || !basePriceOk) {    //在下面三项中输入的不是数字
+        QMessageBox::warning(this, tr("warning"), tr("Please enter number in '会议间隔时间' and '会议基本时间'and '会议基本费用'"));
+    } else {    //用户输入信息全部正确
+        //连接用户数据库（本地测试数据库）
+        QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
+        db.setHostName("localhost");
+        db.setPort(3306);
+        db.setDatabaseName("mei2");
+        db.setUserName("tangjun");
+        db.setPassword("123456");
+        if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
+            QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"));
+            QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
+            return;
+        }
+        QSqlQuery query(db);
+        QString curDTStr = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss");
+        QString sql = QString("insert into meet_room (board_mac, meetroom_c_id, meetroom_name, meetroom_addr, "
+                              "meetroom_location, now_state, meetroom_service, meetroom_intr, "
+                              "meetroom_headpic, meetroom_status, meetroom_apptime, meetroom_passtime, "
+                              "meetroom_price, meetroom_time_interval, meetroom_basePrice, meetroom_baseTime, meetroom_num) "
+                              "values ('', %1, '%2', '%3', '', 0, '', '', '', 0, '%4', '', 0.5, %5, %6, %7, %8)")
+                .arg(busiUserID).arg(mrName).arg(mrAddr).arg(curDTStr).arg(timeInterval).arg(basePrice).arg(baseTime).arg(mrNum);
+        if (query.exec(sql)) {
+            QMessageBox::information(this, tr("info"), tr("Add meet room Successfully!"));
+        } else {
+            QMessageBox::warning(this, tr("Warning"), tr("Failed to add meet room"));
+        }
+
+        db.close();
+        QSqlDatabase::removeDatabase(db.connectionName());
+    }
+}
