@@ -8,7 +8,8 @@
 
 EditUserInfo::EditUserInfo(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::EditUserInfo)
+    ui(new Ui::EditUserInfo),
+    userID(0)
 {
     ui->setupUi(this);
 }
@@ -22,6 +23,7 @@ void EditUserInfo::setUsID(int usID)
 {
     userID = usID;
 }
+
 
 void EditUserInfo::on_btnClose_clicked()
 {

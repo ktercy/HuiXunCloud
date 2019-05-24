@@ -24,11 +24,12 @@ public slots:
 private slots:
     void on_btnBusiLogIn_clicked();
     void on_btnBusiRegi_clicked();
+
     void switchBusiPage(QTreeWidgetItem *twi);  //根据个人中心中用户点击界面左部的索引，切换右边的功能界面
     void switchPerPage(QTreeWidgetItem *twi);   //根据商家平台中用户点击界面左部的索引，切换右边的功能界面
 
-
     void on_btnSubmit_clicked();
+    void on_btnEditData_clicked();
 
 private:
     Ui::MeetSys *ui;

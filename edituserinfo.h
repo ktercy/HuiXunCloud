@@ -17,6 +17,7 @@ public:
 
    void setUsID(int usID);
 
+
 private slots:
     void on_btnClose_clicked();
 

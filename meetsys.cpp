@@ -6,6 +6,7 @@
 #include "lwimeeting.h"
 #include "registerdlg.h"
 #include "mybtn.h"
+#include "edituserinfo.h"
 
 #include <QSqlDatabase> //连接数据库
 #include <QSqlQuery>    //执行sql语句
@@ -188,6 +189,12 @@ void MeetSys::on_btnBusiRegi_clicked()
 {
     RegisterDlg *regDlg = new RegisterDlg(2, this);
     regDlg->exec();
+}
+
+void MeetSys::on_btnEditData_clicked()
+{
+    EditUserInfo *editUserInfo = new EditUserInfo(this);
+    editUserInfo->exec();
 }
 
 void MeetSys::switchPerPage(QTreeWidgetItem *twi)
@@ -779,3 +786,5 @@ void MeetSys::on_btnSubmit_clicked()
         QSqlDatabase::removeDatabase(db.connectionName());
     }
 }
+
+
