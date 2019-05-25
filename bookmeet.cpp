@@ -1,9 +1,9 @@
 #include "bookmeet.h"
 #include "ui_bookmeet.h"
+#include "conndb.h"
 #include <QDateTime>
 #include <QDebug>
 #include <cmath>    //使用round()函数
-#include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QMessageBox>
@@ -60,22 +60,9 @@ void BookMeet::setDisplay()
     ui->dteStart->setMinimumDateTime(curDT);
     ui->dteEnd->setMinimumDateTime(curDT);
 
-    //连接用户数据库（本地测试数据库）
-    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName("localhost");
-    db.setPort(3306);
-    db.setDatabaseName("mei2");
-    db.setUserName("tangjun");
-    db.setPassword("123456");
-    if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
-        QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
-        QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
-        return;
-    }
-
     //查询并设置该会议室的最大人员容纳量
     QString sql = QString("select meetroom_num from meet_room where meetroom_id = %1").arg(meetRoomID);
-    QSqlQuery query(db);
+    QSqlQuery query(ConnDB::db);
     query.exec(sql);
 
     if (!query.first()) {
@@ -98,7 +85,7 @@ void BookMeet::setDisplay()
                   " and app_r_id = %1  and end_time > '%2'").arg(meetRoomID).arg(curDTStr);
     query.exec(sql);
     while (query.next()) {
-        QSqlQuery query2(db);
+        QSqlQuery query2(ConnDB::db);
         query2.exec(QString("select us_name from user_info where us_id = %1").arg(query.value(1).toInt()));
         query2.first();
 
@@ -155,10 +142,6 @@ void BookMeet::setDisplay()
         ui->twMeetings->setItem(rowIndex, 4, twiETime);  //向新增行中写入会议结束时间
 
     }
-
-    db.close();
-    QSqlDatabase::removeDatabase(db.connectionName());
-
     ui->twMeetings->sortItems(3, Qt::AscendingOrder);   //根据会议开始时间升序排序所有已存在的会议预约信息
 }
 
@@ -203,21 +186,7 @@ void BookMeet::on_btnCommit_clicked()
         }
     }
 
-    //将用户填写的正确预约信息写入数据库中
-    //连接用户数据库（本地测试数据库）
-    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName("localhost");
-    db.setPort(3306);
-    db.setDatabaseName("mei2");
-    db.setUserName("tangjun");
-    db.setPassword("123456");
-    if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
-        QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
-        QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
-        return;
-    }
-
-    QSqlQuery query(db);
+    QSqlQuery query(ConnDB::db);
     QString sql = QString("insert into meet_app (app_u_id, app_r_id, meet_title, meet_num, start_time, end_time, people, sum, assort_id) "
                           "value (%1, %2, '%3', %4, '%5', '%6', '', %7, 1)").arg(userID).arg(meetRoomID).arg(meetTitle).arg(num).arg(startTime).arg(endTime).arg(sumCost);
     if (query.exec(sql)) {
@@ -225,7 +194,4 @@ void BookMeet::on_btnCommit_clicked()
     } else {
         qDebug() << query.lastError();
     }
-
-    db.close();
-    QSqlDatabase::removeDatabase(db.connectionName());
 }

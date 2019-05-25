@@ -1,7 +1,7 @@
 #include "edituserinfo.h"
 #include "ui_edituserinfo.h"
+#include "conndb.h"
 #include <QtDebug>
-#include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QMessageBox>
@@ -45,20 +45,8 @@ void EditUserInfo::on_btnSubmit_clicked()
             && mac.isEmpty() && pwd.isEmpty() && pwdChe.isEmpty()) {    //所有输入项都为空，给出提示
         QMessageBox::information(this, tr("Infomation"), tr("No user information has been changed."));
     } else {    //有输入项不为空， 则分别进行判断是否为空，不为空的进行信息修改操作
-        //连接到数据库
-        QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-        db.setHostName("localhost");
-        db.setPort(3306);
-        db.setDatabaseName("mei2");
-        db.setUserName("tangjun");
-        db.setPassword("123456");
-        if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
-            QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"));
-            QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
-            return;
-        }
         QString sql;
-        QSqlQuery query(db);
+        QSqlQuery query(ConnDB::db);
 
         //检查输入信息的合法性
         if (!name.isEmpty()) {  //检查用户名是否已存在
@@ -126,9 +114,6 @@ void EditUserInfo::on_btnSubmit_clicked()
             sql = QString("update user_info set us_pwd = '%1' where us_id = %2").arg(pwd).arg(userID);
             query.exec(sql);
         }
-
-        db.close();
-        QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
         QMessageBox::information(this, tr("information"), tr("Change information successful!"));    //提示用户修改成功
     }
     close(); //关闭修改信息窗口

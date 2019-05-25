@@ -1,7 +1,7 @@
 #include "mybtn.h"
 #include "mytablewidget.h"
+#include "conndb.h"
 #include <QDebug>
-#include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QMessageBox>
@@ -73,25 +73,9 @@ void MyBtn::cancelMeet()
     QMessageBox message(QMessageBox::Warning,"Information", QString("确认取消会议?"), QMessageBox::Yes|QMessageBox::No, parentWidget());
     if (message.exec() == QMessageBox::Yes)
     {
-        //连接用户数据库（本地测试数据库）
-        QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-        db.setHostName("localhost");
-        db.setPort(3306);
-        db.setDatabaseName("mei2");
-        db.setUserName("tangjun");
-        db.setPassword("123456");
-        if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
-            QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
-            QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
-            return;
-        }
-
-        QSqlQuery query(db);
+        QSqlQuery query(ConnDB::db);
         QString sql = QString("update meet_app set pay = 0, operate = 0 where meet_id = %1").arg(meetID);
         query.exec(sql);
-
-        db.close();
-        QSqlDatabase::removeDatabase(db.connectionName());
     }
 }
 
@@ -102,26 +86,14 @@ void MyBtn::checkMeet()
     tw->removeColumn(7);    //该函数只是查看已经预约成功的会议，不需要也不应该有最后一列，所以清除最后一列
     tw->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //设置列表根据内容自动设置列宽
 
-    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName("localhost");
-    db.setPort(3306);
-    db.setDatabaseName("mei2");
-    db.setUserName("tangjun");
-    db.setPassword("123456");
-    if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
-        QMessageBox::warning(parentWidget(), tr("Warning"), tr("Failed to connect database!"));
-        QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
-        return;
-    }
-
     QString curDTStr = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
 
-    QSqlQuery query(db);
+    QSqlQuery query(ConnDB::db);
     QString sql = QString("select app_u_id, meet_title, meet_num, start_time, end_time from meet_app "
                           "where app_r_id = %1 and pay = 1 and operate = 1 and start_time > '%2'").arg(meetRoomID).arg(curDTStr);
     query.exec(sql);
     while (query.next()) {
-        QSqlQuery query2(db);
+        QSqlQuery query2(ConnDB::db);
         sql = QString("select us_name, us_phone, us_email from user_info where us_id = %1").arg(query.value(0).toInt());
         query2.exec(sql);
         query2.first();
@@ -158,11 +130,8 @@ void MyBtn::checkMeet()
         tw->setItem(rowIndex, 6, twiMeetET);
     }
 
-    db.close();
-    QSqlDatabase::removeDatabase(db.connectionName());
     tw->sortItems(5, Qt::AscendingOrder);   //根据会议开始时间升序排序所有已存在的会议预约信息
-
-    myTWDlg.exec();
+    myTWDlg.exec(); //显示会议预约信息
 }
 
 void MyBtn::confirmMeet()
@@ -172,26 +141,14 @@ void MyBtn::confirmMeet()
     tw->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //设置列表根据内容自动设置列宽
     tw->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents); //设置列表根据内容自动设置行高
 
-    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName("localhost");
-    db.setPort(3306);
-    db.setDatabaseName("mei2");
-    db.setUserName("tangjun");
-    db.setPassword("123456");
-    if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
-        QMessageBox::warning(parentWidget(), tr("Warning"), tr("Failed to connect database!"));
-        QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
-        return;
-    }
-
     QString curDTStr = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
 
-    QSqlQuery query(db);
+    QSqlQuery query(ConnDB::db);
     QString sql = QString("select app_u_id, meet_title, meet_num, start_time, end_time, meet_id from meet_app "
                           "where app_r_id = %1 and pay = 0 and operate = 1 and start_time > '%2'").arg(meetRoomID).arg(curDTStr);
     query.exec(sql);
     while (query.next()) {
-        QSqlQuery query2(db);
+        QSqlQuery query2(ConnDB::db);
         sql = QString("select us_name, us_phone, us_email from user_info where us_id = %1").arg(query.value(0).toInt());
         query2.exec(sql);
         query2.first();
@@ -241,12 +198,8 @@ void MyBtn::confirmMeet()
         tw->setItem(rowIndex, 6, twiMeetET);
         tw->setCellWidget(rowIndex, 7, wid);
     }
-
-    db.close();
-    QSqlDatabase::removeDatabase(db.connectionName());
     tw->sortItems(5, Qt::AscendingOrder);   //根据会议开始时间升序排序所有已存在的会议预约信息
-
-    myTWDlg.exec();
+    myTWDlg.exec(); //显示会议预约信息
 }
 
 void MyBtn::agreeMeet()
@@ -254,24 +207,9 @@ void MyBtn::agreeMeet()
     QMessageBox message(QMessageBox::Warning,"Information", QString("确定同意预约?"), QMessageBox::Yes|QMessageBox::No, parentWidget());
     if (message.exec() == QMessageBox::Yes)
     {
-        //连接用户数据库（本地测试数据库）
-        QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-        db.setHostName("localhost");
-        db.setPort(3306);
-        db.setDatabaseName("mei2");
-        db.setUserName("tangjun");
-        db.setPassword("123456");
-        if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
-            QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
-            QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
-            return;
-        }
-        QSqlQuery query(db);
+        QSqlQuery query(ConnDB::db);
         QString sql = QString("update meet_app set pay = 1 where meet_id = %1").arg(meetID);
-        qDebug() << "meet_id = " << meetID, query.exec(sql);
-
-        db.close();
-        QSqlDatabase::removeDatabase(db.connectionName());
+        query.exec(sql);
     }
 }
 
@@ -280,24 +218,8 @@ void MyBtn::refuseMeet()
     QMessageBox message(QMessageBox::Warning,"Information", QString("确定拒绝预约?"), QMessageBox::Yes|QMessageBox::No, parentWidget());
     if (message.exec() == QMessageBox::Yes)
     {
-        //连接用户数据库（本地测试数据库）
-        QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-        db.setHostName("localhost");
-        db.setPort(3306);
-        db.setDatabaseName("mei2");
-        db.setUserName("tangjun");
-        db.setPassword("123456");
-        if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
-            QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
-            QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
-            return;
-        }
-
-        QSqlQuery query(db);
+        QSqlQuery query(ConnDB::db);
         QString sql = QString("update meet_app set pay = -1 where meet_id = %1").arg(meetID);
         query.exec(sql);
-
-        db.close();
-        QSqlDatabase::removeDatabase(db.connectionName());
     }
 }

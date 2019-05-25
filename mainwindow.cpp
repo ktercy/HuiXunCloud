@@ -1,9 +1,9 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "edituserinfo.h"
+#include "conndb.h"
 #include <QDialog>
 #include <QtDebug>
-#include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QMessageBox>
@@ -44,20 +44,7 @@ void MainWindow::getUsID(int usID) { //获得登录用户id
 }
 
 void MainWindow::displayUsInfo(){
-    //连接用户数据库（本地测试数据库）
-    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName("localhost");
-    db.setPort(3306);
-    db.setDatabaseName("mei2");
-    db.setUserName("tangjun");
-    db.setPassword("123456");
-    if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
-       QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
-       QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
-       return;
-    }
-
-    QSqlQuery query(db);
+    QSqlQuery query(ConnDB::db);
     QString sql = QString("select us_name, us_phone, us_email, mac, us_rtime from user_info where us_id = %1").arg(userID);
     query.exec(sql);
     if (!query.first())
@@ -72,12 +59,7 @@ void MainWindow::displayUsInfo(){
         ui->labMacData->setText(query.value(3).toString());
         ui->labRTimeData->setText(query.value(4).toString());
     }
-    db.close();
-    QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
 }
-
-
-
 
 void MainWindow::on_btnEditData_clicked()
 {

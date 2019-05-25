@@ -3,12 +3,12 @@
 #include "mainwindow.h"
 #include "ui_logindlg.h"
 #include "meetsys.h"
+#include "conndb.h" //连接数据库
 #include <QString>
-#include <QSqlDatabase> //连接数据库
 #include <QSqlQuery>    //执行sql语句
-#include <QDebug>
 #include <QSqlError>    //sql语句错误
 #include <QMessageBox>  //警告窗口
+#include <QDebug>
 
 LogInDlg::LogInDlg(QWidget *parent) :
     QDialog(parent),
@@ -58,22 +58,9 @@ void LogInDlg::on_logInBtn_clicked()
         return;
     }
 
-    //连接用户数据库（本地测试数据库）
-    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName("localhost");
-    db.setPort(3306);
-    db.setDatabaseName("mei2");
-    db.setUserName("tangjun");
-    db.setPassword("123456");
-    if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
-       QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
-       QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
-       return;
-    }
-
     //查询数据库中此用户是否存在
     QString sql = QString("select us_pwd, us_id from user_info where us_name = '%1'").arg(userName);
-    QSqlQuery query(db);
+    QSqlQuery query(ConnDB::db);
     query.exec(sql);
     if (!query.first()) {   //用户不存在
         qDebug() << query.lastError().text();
@@ -92,14 +79,11 @@ void LogInDlg::on_logInBtn_clicked()
     } else {    //其他未知错误
         QMessageBox::warning(this, tr("Warning"), tr("Unknown error!"), QMessageBox::Yes);
     }
-
-    db.close(); //关闭连接
-    QSqlDatabase::removeDatabase(db.connectionName());   //移除连接
 }
 
 void LogInDlg::on_exitBtn_clicked()
 {
-    reject(); //隐藏登录窗口
+    reject(); //关闭登录窗口
 }
 
 void LogInDlg::on_registerBtn_clicked()
@@ -118,6 +102,5 @@ void LogInDlg::getRes(int res){
         emit posUsID(userID);
         meetSys->displayMeetings();
         meetSys->show();
-        qDebug() << "show meet system window";
     }
 }

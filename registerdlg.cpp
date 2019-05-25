@@ -1,10 +1,10 @@
 #include "registerdlg.h"
 #include "ui_registerdlg.h"
-#include <Qt>
+#include "conndb.h"
+//#include <Qt>
 #include <QString>
 #include <QFont>
 #include <QMessageBox>
-#include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QDebug>
@@ -54,21 +54,7 @@ void RegisterDlg::on_confirmBtn_clicked()
         return;
     }
 
-    //判断用户输入的用户名和手机号已被注册
-    //连接用户数据库（本地测试数据库）
-    QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
-    db.setHostName("localhost");
-    db.setPort(3306);
-    db.setDatabaseName("mei2");
-    db.setUserName("tangjun");
-    db.setPassword("123456");
-    if (!db.open()) {   //打开数据库，如果出错，则弹出警告窗口
-       QMessageBox::warning(this, tr("Warning"), tr("Failed to connect database!"), QMessageBox::Yes);
-       QSqlDatabase::removeDatabase("conLogIn");   //移除连接
-       return;
-    }
-
-    QSqlQuery query(db);
+    QSqlQuery query(ConnDB::db);
     QString sql;
 
     if (regiType == 1) {    //根据注册类型，需要不同的sql语句

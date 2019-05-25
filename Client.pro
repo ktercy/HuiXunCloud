@@ -36,7 +36,8 @@ SOURCES += \
     bookmeet.cpp \
     lwimeeting.cpp \
     mybtn.cpp \
-    mytablewidget.cpp
+    mytablewidget.cpp \
+    conndb.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -51,7 +52,8 @@ HEADERS += \
     bookmeet.h \
     lwimeeting.h \
     mybtn.h \
-    mytablewidget.h
+    mytablewidget.h \
+    conndb.h
 
 FORMS += \
         mainwindow.ui \
