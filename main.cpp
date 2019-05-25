@@ -9,7 +9,9 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    if (!ConnDB::initDB()) {return 0;}  //连接数据库失败时，直接退出程序
+    if (!ConnDB::initDB()) {
+        return 0;
+    }  //连接数据库失败时，直接退出程序
 
     LogInDlg logInDlg;
     logInDlg.show();

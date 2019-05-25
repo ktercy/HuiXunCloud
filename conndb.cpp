@@ -1,5 +1,6 @@
 #include "conndb.h"
 #include <QMessageBox>
+#include <QSqlError>
 
 QSqlDatabase ConnDB::db;
 
@@ -20,7 +21,7 @@ bool ConnDB::initDB()
     db.setDatabaseName("testTangJun");
 
     if (!db.open()) {
-        QMessageBox::warning(nullptr, QObject::tr("Warning"), QObject::tr("Failed to connect database!"), QMessageBox::Cancel);
+        QMessageBox::warning(nullptr, QString("Warning"), db.lastError().text(), QMessageBox::Cancel);
         return false;
     }
 
