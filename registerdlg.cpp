@@ -69,9 +69,9 @@ void RegisterDlg::on_confirmBtn_clicked()
     }
 
     if (regiType == 1) {    //根据注册类型，需要不同的sql语句
-        sql = QString("select us_id from user_info where us_phone = '%1'").arg(userPhone);
+        sql = QString("select us_id from user_info where us_phone = '%1'").arg(userPhone);  //普通用户注册
     } else if (regiType == 2) {
-        sql = QString("select company_id from company_info where us_phone = '%1'").arg(userPhone);
+        sql = QString("select company_id from company_info where us_phone = '%1'").arg(userPhone);  //商家用户注册
     }
     query.exec(sql);
     if (query.first()) {    //电话号码已存在
@@ -88,9 +88,11 @@ void RegisterDlg::on_confirmBtn_clicked()
         sql = QString("insert into company_info(company_name, company_pwd, company_logo, company_boss, company_addr, company_phone, company_email, company_rtime) "
                       "value('%1', '%2', '', '', '', '%3', '', '%4')").arg(userName).arg(pwd).arg(userPhone).arg(curDT.toString("yyyy-MM-dd hh:mm:ss"));
     }
+    qDebug() << "准备执行注册";
     if (query.exec(sql)) {
         QMessageBox::information(this, tr("Infomation"), tr("Successful registration."), QMessageBox::Yes);
         close();
     }
+    qDebug() << query.lastError();
 }
 

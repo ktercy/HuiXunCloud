@@ -23,23 +23,24 @@ MeetSys::MeetSys(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    ui->twPerCenter->expandAll();
-    updatePerInfo();
-    ui->swPerCenter->setCurrentIndex(0);    //默认显示个人信息界面
+    ui->tabWidget->setCurrentIndex(0);  //默认显示预约会议界面
+    ui->twPerCenter->expandAll();   //默认展开个人信息的左侧treeWidget
+//    updatePerInfo();  //要在displayMeetings()中调用才行
+    ui->swPerCenter->setCurrentIndex(0);    //默认显示个人信息页面
 
     //设置默认商家用户登录名与密码，方便测试程序
     ui->leBusiUserName->setText("busi唐俊");
     ui->leBusiPwd->setText("123456");
 
     ui->twBusiCenter->expandAll();
-    ui->swBusiPlatForm->setCurrentIndex(0); //默认显示商家登录界面
-    ui->swBusiCenter->setCurrentIndex(0);   //默认显示商家信息界面
+    ui->swBusiPlatForm->setCurrentIndex(0); //默认显示商家登录页面
+    ui->swBusiCenter->setCurrentIndex(0);   //默认显示商家信息页面
 
     //绑定信号与槽，使每次点击个人中心和商家中心界面左边的索引时，右边切换到对应的功能界面
     connect(ui->twBusiCenter, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(switchBusiPage(QTreeWidgetItem*)));
     connect(ui->twPerCenter, SIGNAL(itemClicked(QTreeWidgetItem*, int)), this, SLOT(switchPerPage(QTreeWidgetItem*)));
 
-
+    connect(ui->tabWidget, SIGNAL(tabBarClicked(int)), this, SLOT(updataMeetings(int)));
 }
 
 MeetSys::~MeetSys()
@@ -51,6 +52,8 @@ void MeetSys::displayMeetings()
 {
     updatePerInfo();    //顺便显示个人信息
 
+    ui->lwBoMeet->clear();    //清空所有会议室信息
+
     //从数据库中查询所有会议室的名称和地址
     QString sql = QString("select meetroom_id, meetroom_name, meetroom_addr from meet_room where meetroom_status = 1");
     QSqlQuery query(ConnDB::db);
@@ -61,7 +64,7 @@ void MeetSys::displayMeetings()
         for (int i = 0; i < query.size(); i++, query.next()){
             QListWidgetItem *item = new QListWidgetItem();
             item->setSizeHint(QSize(500,60));
-            if(i%2 == 0) {  //每隔一条会议室信息，将背景色设置为灰色，方便用户辨认
+            if((i % 2) == 0) {  //每隔一条会议室信息，将背景色设置为灰色，方便用户辨认
                 item->setBackgroundColor(QColor(240, 240, 240));
             }
             ui->lwBoMeet->addItem(item);
@@ -165,6 +168,15 @@ void MeetSys::on_btnEditData_clicked()
 {
     EditUserInfo *editUserInfo = new EditUserInfo(this);
     editUserInfo->exec();
+}
+
+void MeetSys::updataMeetings(int tabIndex)
+{
+    //如果“预约会议”标签被点击，即用户切换到预约会议界面，则更新会议室信息
+    if (tabIndex == 0){
+        displayMeetings();
+    }
+    qDebug() << "updataMeetings";
 }
 
 void MeetSys::switchPerPage(QTreeWidgetItem *twi)
@@ -539,7 +551,8 @@ void MeetSys::updateMROnLine()
         MyBtn *btnMeetSta = new MyBtn(BtnFunType::mr_online_status, this);
         QString curDTStr = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
         QSqlQuery query2(ConnDB::db);   //查询该会议室的待处理预约数量
-        sql = QString("select meet_id from meet_app where app_r_id = %1 and pay =0 and operate = 1 and start_time > '%2'").arg(query.value(0).toInt()).arg(curDTStr);
+//        sql = QString("select meet_id from meet_app where app_r_id = %1 and pay =0 and operate = 1 and start_time > '%2'").arg(query.value(0).toInt()).arg(curDTStr);
+        sql = QString("select meet_id from meet_app where app_r_id = %1 and pay =0 and operate = 1").arg(query.value(0).toInt());
         query2.exec(sql);
         btnMeetSta->setText(QString::number(query2.size()));
         btnMeetSta->setMeetRoomID(query.value(0).toInt());

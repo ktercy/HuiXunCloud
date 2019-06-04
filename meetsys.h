@@ -31,6 +31,8 @@ private slots:
     void on_btnSubmit_clicked();
     void on_btnEditData_clicked();
 
+    void updataMeetings(int tabIndex);  //重新显示会议室列表
+
 private:
     Ui::MeetSys *ui;
     int userID; //普通用户ID

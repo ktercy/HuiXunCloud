@@ -98,9 +98,10 @@ void LogInDlg::getRes(int res){
         classSys->show();
     }
     else if ( res == 2) {   //用户选择会议系统，则显示会议系统界面
-        //显示会议系统
-        emit posUsID(userID);
+        emit posUsID(userID);   //将登录的用户的ID传递给会议系统界面类
+        //由于会议系统的部分界面内容需要根据具体登录的用户显示，
+        //因此得到用户ID后才显示这部分内容
         meetSys->displayMeetings();
-        meetSys->show();
+        meetSys->show();    //显示主界面
     }
 }

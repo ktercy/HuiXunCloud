@@ -27,8 +27,6 @@ public:
     int getMeetRoomID();    //获取会议室ID
     int getMeetD(); //获取会议ID
 
-signals:
-
 private slots:
    void clickFunc();
 

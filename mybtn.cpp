@@ -89,8 +89,10 @@ void MyBtn::checkMeet()
     QString curDTStr = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
 
     QSqlQuery query(ConnDB::db);
+//    QString sql = QString("select app_u_id, meet_title, meet_num, start_time, end_time from meet_app "
+//                          "where app_r_id = %1 and pay = 1 and operate = 1 and start_time > '%2'").arg(meetRoomID).arg(curDTStr);
     QString sql = QString("select app_u_id, meet_title, meet_num, start_time, end_time from meet_app "
-                          "where app_r_id = %1 and pay = 1 and operate = 1 and start_time > '%2'").arg(meetRoomID).arg(curDTStr);
+                          "where app_r_id = %1 and pay = 1 and operate = 1").arg(meetRoomID);
     query.exec(sql);
     while (query.next()) {
         QSqlQuery query2(ConnDB::db);
@@ -144,8 +146,10 @@ void MyBtn::confirmMeet()
     QString curDTStr = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm");
 
     QSqlQuery query(ConnDB::db);
+//    QString sql = QString("select app_u_id, meet_title, meet_num, start_time, end_time, meet_id from meet_app "
+//                          "where app_r_id = %1 and pay = 0 and operate = 1 and start_time > '%2'").arg(meetRoomID).arg(curDTStr);
     QString sql = QString("select app_u_id, meet_title, meet_num, start_time, end_time, meet_id from meet_app "
-                          "where app_r_id = %1 and pay = 0 and operate = 1 and start_time > '%2'").arg(meetRoomID).arg(curDTStr);
+                          "where app_r_id = %1 and pay = 0 and operate = 1").arg(meetRoomID);
     query.exec(sql);
     while (query.next()) {
         QSqlQuery query2(ConnDB::db);
